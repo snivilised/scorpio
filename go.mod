@@ -1,4 +1,4 @@
-module github.com/snivilised/arcadia
+module github.com/snivilised/scorpio
 
 go 1.19
 

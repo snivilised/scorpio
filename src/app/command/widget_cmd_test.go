@@ -6,11 +6,11 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	"github.com/snivilised/arcadia/src/app/command"
-	"github.com/snivilised/arcadia/src/i18n"
-	"github.com/snivilised/arcadia/src/internal/helpers"
 	xi18n "github.com/snivilised/extendio/i18n"
 	"github.com/snivilised/extendio/xfs/utils"
+	"github.com/snivilised/scorpio/src/app/command"
+	"github.com/snivilised/scorpio/src/i18n"
+	"github.com/snivilised/scorpio/src/internal/helpers"
 
 	ci18n "github.com/snivilised/cobrass/src/assistant/i18n"
 )
@@ -35,7 +35,7 @@ var _ = Describe("WidgetCmd", Ordered, func() {
 			uo.From = xi18n.LoadFrom{
 				Path: l10nPath,
 				Sources: xi18n.TranslationFiles{
-					i18n.ArcadiaSourceID: xi18n.TranslationSource{
+					i18n.ScorpioSourceID: xi18n.TranslationSource{
 						Name: "pixa",
 					},
 

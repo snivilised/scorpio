@@ -5,7 +5,7 @@ before:
     # - go mod generate
 
 builds:
-  - id: "arcadia"
+  - id: "scorpio"
     env:
       - CGO_ENABLED=0
     goos:

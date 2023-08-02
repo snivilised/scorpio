@@ -12,7 +12,7 @@ import (
 // that this message has been removed from the translation files, so
 // it is not useable at run time.
 type FooBarTemplData struct {
-	arcadiaTemplData
+	scorpioTemplData
 	Path   string
 	Reason error
 }

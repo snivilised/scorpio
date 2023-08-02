@@ -9,9 +9,9 @@ import (
 
 const (
 	AppEmoji        = "🦄"
-	ApplicationName = "arcadia"
+	ApplicationName = "scorpio"
 	RootPsName      = "root-ps"
-	SourceID        = "github.com/snivilised/arcadia"
+	SourceID        = "github.com/snivilised/scorpio"
 )
 
 type ExecutionOptions struct {
