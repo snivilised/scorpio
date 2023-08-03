@@ -36,7 +36,7 @@ var _ = Describe("PoolCmd", Ordered, func() {
 				Path: l10nPath,
 				Sources: xi18n.TranslationFiles{
 					i18n.ScorpioSourceID: xi18n.TranslationSource{
-						Name: "pixa",
+						Name: "scorpio",
 					},
 
 					ci18n.CobrassSourceID: xi18n.TranslationSource{
@@ -57,7 +57,7 @@ var _ = Describe("PoolCmd", Ordered, func() {
 				Detector: &DetectorStub{},
 			}
 			tester := helpers.CommandTester{
-				Args: []string{"pool", "-p", "P?<date>", "-t", "42"},
+				Args: []string{"pool", "-c", "2", "-b", "5"},
 				Root: bootstrap.Root(),
 			}
 			_, err := tester.Execute()
@@ -67,13 +67,13 @@ var _ = Describe("PoolCmd", Ordered, func() {
 		})
 	})
 
-	When("specified flags are valid", func() {
+	When("specified flags are invalid", func() {
 		It("🧪 should: return error due to option validation failure", func() {
 			bootstrap := command.Bootstrap{
 				Detector: &DetectorStub{},
 			}
 			tester := helpers.CommandTester{
-				Args: []string{"pool", "-p", "P?<date>", "-t", "99"},
+				Args: []string{"pool", "-b", "100"},
 				Root: bootstrap.Root(),
 			}
 			_, err := tester.Execute()

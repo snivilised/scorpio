@@ -80,8 +80,8 @@ type PoolCmdShortDescTemplData struct {
 func (td PoolCmdShortDescTemplData) Message() *i18n.Message {
 	return &i18n.Message{
 		ID:          "pool-command-short-description",
-		Description: "short description for the pool command",
-		Other:       "A brief description of pool command",
+		Description: "pool command short description",
+		Other:       "command to test lorax worker pool functionality",
 	}
 }
 
@@ -95,8 +95,19 @@ type PoolCmdLongDescTemplData struct {
 func (td PoolCmdLongDescTemplData) Message() *i18n.Message {
 	return &i18n.Message{
 		ID:          "pool-command-long-description",
-		Description: "long description for the pool command",
-		Other: `A longer description that spans multiple lines and likely contains
-		examples and usage of using your application.`,
+		Description: "pool command long description",
+		Other: `The lorax reactive library contains a worker pool implementation
+		that supports streaming a queue of jobs to the worker pool. Scorpio is just
+		a test utility that demonstrates how the pool works. The pool command
+		achieves this be defining a hot observable which generates dummy messages
+		(in this case as a random sequence of names). The job has been implemented
+		by Scorpio as simply a function that prints a greeting to the person specified.
+		The observable emits these messages in batches, continuously until the user
+		presses the enter key. At this point, there may still be outstanding work
+		to be processed, so the main go routine blocks until the worker pool has signified
+		it has received all results from the workers. At the end of the run, Scorpio
+		will display the total number of jobs submitted and the results received by
+		the observer, which should always match. This check demonstrates that the observer
+		and the observable have been implemented correctly.`,
 	}
 }

@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	AppEmoji        = "🦄"
+	AppEmoji        = "🦂"
 	ApplicationName = "scorpio"
 	RootPsName      = "root-ps"
 	SourceID        = "github.com/snivilised/scorpio"

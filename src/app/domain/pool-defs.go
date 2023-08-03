@@ -2,34 +2,13 @@ package domain
 
 import "github.com/snivilised/cobrass/src/assistant"
 
-// CLIENT-TODO: remove this dummy enum type definition
-
-type OutputFormatEnum int
-
-const (
-	_ OutputFormatEnum = iota
-	XMLFormatEn
-	JSONFormatEn
-	TextFormatEn
-	ScribbleFormatEn
-)
-
-var OutputFormatEnumInfo = assistant.NewEnumInfo(assistant.AcceptableEnumValues[OutputFormatEnum]{
-	XMLFormatEn:      []string{"xml", "x"},
-	JSONFormatEn:     []string{"json", "j"},
-	TextFormatEn:     []string{"text", "tx"},
-	ScribbleFormatEn: []string{"scribble", "scribbler", "scr"},
-})
-
 // PoolParameterSet
 type PoolParameterSet struct {
-	Directory string
-	Concise   bool
-	Pattern   string
-	Threshold uint
-
-	Format   OutputFormatEnum
-	FormatEn assistant.EnumValue[OutputFormatEnum]
+	NumCPU          int
+	BatchSize       int
+	JobQueueSize    int
+	ResultQueueSize int
+	Delay           int
 }
 
 type PoolParamSetPtr = *assistant.ParamSet[PoolParameterSet]
