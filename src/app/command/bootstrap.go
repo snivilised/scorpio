@@ -59,7 +59,7 @@ func (b *Bootstrap) Root() *cobra.Command {
 	)
 
 	b.buildRootCommand(b.container)
-	buildWidgetCommand(b.container)
+	buildPoolCommand(b.container)
 
 	return b.container.Root()
 }

@@ -8,9 +8,9 @@ import "fmt"
 // purposes.
 //
 
-func EnterWidget(ps *WidgetParameterSet) error {
+func EnterPool(ps *PoolParameterSet) error {
 	if ps.Directory != "" {
-		fmt.Printf("---> Enter(widget): directory: '%v'\n", ps.Directory)
+		fmt.Printf("---> Enter(pool): directory: '%v'\n", ps.Directory)
 	}
 
 	return nil

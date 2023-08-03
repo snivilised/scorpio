@@ -21,8 +21,8 @@ var OutputFormatEnumInfo = assistant.NewEnumInfo(assistant.AcceptableEnumValues[
 	ScribbleFormatEn: []string{"scribble", "scribbler", "scr"},
 })
 
-// WidgetParameterSet
-type WidgetParameterSet struct {
+// PoolParameterSet
+type PoolParameterSet struct {
 	Directory string
 	Concise   bool
 	Pattern   string
@@ -32,4 +32,4 @@ type WidgetParameterSet struct {
 	FormatEn assistant.EnumValue[OutputFormatEnum]
 }
 
-type WidgetParamSetPtr = *assistant.ParamSet[WidgetParameterSet]
+type PoolParamSetPtr = *assistant.ParamSet[PoolParameterSet]

@@ -15,24 +15,24 @@ import (
 	"github.com/snivilised/scorpio/src/i18n"
 )
 
-// CLIENT-TODO: rename this widget command to something required
-// by the application. Widget command is meant to just serve as
+// CLIENT-TODO: rename this pool command to something required
+// by the application. Pool command is meant to just serve as
 // an aid in creating custom commands and intended to either be
 // replaced or renamed.
 
-const widgetPsName = "widget-ps"
+const poolPsName = "pool-ps"
 
-func buildWidgetCommand(container *assistant.CobraContainer) *cobra.Command {
-	// to test: arcadia widget -d ./some-existing-file -p "P?<date>" -t 30
+func buildPoolCommand(container *assistant.CobraContainer) *cobra.Command {
+	// to test: arcadia pool -d ./some-existing-file -p "P?<date>" -t 30
 	//
-	widgetCommand := &cobra.Command{
-		Use:   "widget",
-		Short: xi18n.Text(i18n.WidgetCmdShortDescTemplData{}),
-		Long:  xi18n.Text(i18n.WidgetCmdLongDescTemplData{}),
+	poolCommand := &cobra.Command{
+		Use:   "pool",
+		Short: xi18n.Text(i18n.PoolCmdShortDescTemplData{}),
+		Long:  xi18n.Text(i18n.PoolCmdLongDescTemplData{}),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var appErr error
 
-			ps := container.MustGetParamSet(widgetPsName).(domain.WidgetParamSetPtr) //nolint:errcheck // is Must call
+			ps := container.MustGetParamSet(poolPsName).(domain.PoolParamSetPtr) //nolint:errcheck // is Must call
 
 			if err := ps.Validate(); err == nil {
 				native := ps.Native
@@ -45,7 +45,7 @@ func buildWidgetCommand(container *assistant.CobraContainer) *cobra.Command {
 
 				// optionally invoke cross field validation
 				//
-				if xv := ps.CrossValidate(func(ps *domain.WidgetParameterSet) error {
+				if xv := ps.CrossValidate(func(ps *domain.PoolParameterSet) error {
 					condition := (ps.Format == domain.XMLFormatEn)
 					if condition {
 						return nil
@@ -56,11 +56,11 @@ func buildWidgetCommand(container *assistant.CobraContainer) *cobra.Command {
 					cmd.Flags().Visit(func(f *pflag.Flag) {
 						options = append(options, fmt.Sprintf("--%v=%v", f.Name, f.Value))
 					})
-					fmt.Printf("%v %v Running widget, with options: '%v', args: '%v'\n",
+					fmt.Printf("%v %v Running pool, with options: '%v', args: '%v'\n",
 						AppEmoji, ApplicationName, options, args,
 					)
 
-					appErr = domain.EnterWidget(native)
+					appErr = domain.EnterPool(native)
 				} else {
 					return xv
 				}
@@ -73,7 +73,7 @@ func buildWidgetCommand(container *assistant.CobraContainer) *cobra.Command {
 	}
 
 	defaultDirectory := "/default-directory"
-	paramSet := assistant.NewParamSet[domain.WidgetParameterSet](widgetCommand)
+	paramSet := assistant.NewParamSet[domain.PoolParameterSet](poolCommand)
 	paramSet.BindValidatedString(
 		assistant.NewFlagInfo("directory", "d", defaultDirectory),
 		&paramSet.Native.Directory,
@@ -130,7 +130,7 @@ func buildWidgetCommand(container *assistant.CobraContainer) *cobra.Command {
 		},
 	)
 
-	_ = widgetCommand.MarkFlagRequired("pattern")
+	_ = poolCommand.MarkFlagRequired("pattern")
 
 	const (
 		Low  = uint(25)
@@ -144,13 +144,13 @@ func buildWidgetCommand(container *assistant.CobraContainer) *cobra.Command {
 		Low, High,
 	)
 
-	// If you want to disable the widget command but keep it in the project for reference
+	// If you want to disable the pool command but keep it in the project for reference
 	// purposes, then simply comment out the following 2 register calls:
 	// (Warning, this may just create dead code and result in lint failure so tread
 	// carefully.)
 	//
-	container.MustRegisterRootedCommand(widgetCommand)
-	container.MustRegisterParamSet(widgetPsName, paramSet)
+	container.MustRegisterRootedCommand(poolCommand)
+	container.MustRegisterParamSet(poolPsName, paramSet)
 
-	return widgetCommand
+	return poolCommand
 }

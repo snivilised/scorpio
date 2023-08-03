@@ -70,32 +70,32 @@ func (td RootCmdLangUsageTemplData) Message() *i18n.Message {
 	}
 }
 
-// 🧊 Widget Cmd Short Description
+// 🧊 Pool Cmd Short Description
 
-// WidgetCmdShortDescTemplData
-type WidgetCmdShortDescTemplData struct {
+// PoolCmdShortDescTemplData
+type PoolCmdShortDescTemplData struct {
 	scorpioTemplData
 }
 
-func (td WidgetCmdShortDescTemplData) Message() *i18n.Message {
+func (td PoolCmdShortDescTemplData) Message() *i18n.Message {
 	return &i18n.Message{
-		ID:          "widget-command-short-description",
-		Description: "short description for the widget command",
-		Other:       "A brief description of widget command",
+		ID:          "pool-command-short-description",
+		Description: "short description for the pool command",
+		Other:       "A brief description of pool command",
 	}
 }
 
-// 🧊 Widget Cmd Long Description
+// 🧊 Pool Cmd Long Description
 
-// WidgetCmdLongDescTemplData
-type WidgetCmdLongDescTemplData struct {
+// PoolCmdLongDescTemplData
+type PoolCmdLongDescTemplData struct {
 	scorpioTemplData
 }
 
-func (td WidgetCmdLongDescTemplData) Message() *i18n.Message {
+func (td PoolCmdLongDescTemplData) Message() *i18n.Message {
 	return &i18n.Message{
-		ID:          "widget-command-long-description",
-		Description: "long description for the widget command",
+		ID:          "pool-command-long-description",
+		Description: "long description for the pool command",
 		Other: `A longer description that spans multiple lines and likely contains
 		examples and usage of using your application.`,
 	}

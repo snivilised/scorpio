@@ -15,7 +15,7 @@ import (
 	ci18n "github.com/snivilised/cobrass/src/assistant/i18n"
 )
 
-var _ = Describe("WidgetCmd", Ordered, func() {
+var _ = Describe("PoolCmd", Ordered, func() {
 	var (
 		repo     string
 		l10nPath string
@@ -57,7 +57,7 @@ var _ = Describe("WidgetCmd", Ordered, func() {
 				Detector: &DetectorStub{},
 			}
 			tester := helpers.CommandTester{
-				Args: []string{"widget", "-p", "P?<date>", "-t", "42"},
+				Args: []string{"pool", "-p", "P?<date>", "-t", "42"},
 				Root: bootstrap.Root(),
 			}
 			_, err := tester.Execute()
@@ -73,7 +73,7 @@ var _ = Describe("WidgetCmd", Ordered, func() {
 				Detector: &DetectorStub{},
 			}
 			tester := helpers.CommandTester{
-				Args: []string{"widget", "-p", "P?<date>", "-t", "99"},
+				Args: []string{"pool", "-p", "P?<date>", "-t", "99"},
 				Root: bootstrap.Root(),
 			}
 			_, err := tester.Execute()
