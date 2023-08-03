@@ -1,4 +1,4 @@
-# 🦄 scorpio: ___Go template for Cobra based cli applications___
+# 🦂 scorpio: ___Go template for Cobra based cli applications___
 
 [![A B](https://img.shields.io/badge/branching-commonflow-informational?style=flat)](https://commonflow.org)
 [![A B](https://img.shields.io/badge/merge-rebase-informational?style=flat)](https://git-scm.com/book/en/v2/Git-Branching-Rebasing)

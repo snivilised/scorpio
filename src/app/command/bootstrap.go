@@ -7,6 +7,7 @@ import (
 	"github.com/cubiest/jibberjabber"
 	"github.com/samber/lo"
 	"github.com/snivilised/cobrass/src/assistant"
+	ci18n "github.com/snivilised/cobrass/src/assistant/i18n"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
@@ -59,7 +60,7 @@ func (b *Bootstrap) Root() *cobra.Command {
 	)
 
 	b.buildRootCommand(b.container)
-	buildWidgetCommand(b.container)
+	buildPoolCommand(b.container)
 
 	return b.container.Root()
 }
@@ -135,6 +136,19 @@ func handleLangSetting() {
 		uo.From = xi18n.LoadFrom{
 			Sources: xi18n.TranslationFiles{
 				SourceID: xi18n.TranslationSource{Name: ApplicationName},
+
+				// By adding in the source for cobrass, we relieve the client from having
+				// to do this. After-all, it should be taken as read that since any
+				// instantiation of arcadia (ie a project using this template) is by
+				// necessity dependent on cobrass, it's source should be loaded so that a
+				// localizer can be created for it.
+				//
+				// The client app has to make sure that when their app is deployed,
+				// the translations file(s) for cobrass are named as 'cobrass', as you
+				// can see below, that is the name assigned to the app name of the
+				// source.
+				//
+				ci18n.CobrassSourceID: xi18n.TranslationSource{Name: "cobrass"},
 			},
 		}
 	})

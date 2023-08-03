@@ -8,10 +8,8 @@ import "fmt"
 // purposes.
 //
 
-func EnterWidget(ps *WidgetParameterSet) error {
-	if ps.Directory != "" {
-		fmt.Printf("---> Enter(widget): directory: '%v'\n", ps.Directory)
-	}
+func EnterPool(_ *PoolParameterSet) error {
+	fmt.Println("---> 🎯 orpheus(alpha) ...")
 
 	return nil
 }
