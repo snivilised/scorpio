@@ -5,6 +5,14 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "bad batch flag",
+      "type": "go",
+      "request": "launch",
+      "mode": "debug",
+      "args": ["pool", "-b", "44"],
+      "program": "src/app/main/main.go"
+    },
+    {
       "name": "Launch Package",
       "type": "go",
       "request": "launch",
