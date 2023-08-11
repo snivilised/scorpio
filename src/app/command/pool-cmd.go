@@ -10,20 +10,13 @@ import (
 
 	xi18n "github.com/snivilised/extendio/i18n"
 
-	"github.com/snivilised/scorpio/src/app/domain"
+	"github.com/snivilised/scorpio/src/app/react"
 	"github.com/snivilised/scorpio/src/i18n"
 )
-
-// CLIENT-TODO: rename this pool command to something required
-// by the application. Pool command is meant to just serve as
-// an aid in creating custom commands and intended to either be
-// replaced or renamed.
 
 const poolPsName = "pool-ps"
 
 func buildPoolCommand(container *assistant.CobraContainer) *cobra.Command {
-	// to test: arcadia pool -d ./some-existing-file -p "P?<date>" -t 30
-	//
 	poolCommand := &cobra.Command{
 		Use:   "pool",
 		Short: xi18n.Text(i18n.PoolCmdShortDescTemplData{}),
@@ -31,14 +24,14 @@ func buildPoolCommand(container *assistant.CobraContainer) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var appErr error
 
-			ps := container.MustGetParamSet(poolPsName).(domain.PoolParamSetPtr) //nolint:errcheck // is Must call
+			ps := container.MustGetParamSet(poolPsName).(react.PoolParamSetPtr) //nolint:errcheck // is Must call
 
 			if err := ps.Validate(); err == nil {
 				native := ps.Native
 
 				// optionally invoke cross field validation
 				//
-				if xv := ps.CrossValidate(func(ps *domain.PoolParameterSet) error {
+				if xv := ps.CrossValidate(func(ps *react.PoolParameterSet) error {
 					return nil
 				}); xv == nil {
 					options := []string{}
@@ -49,7 +42,7 @@ func buildPoolCommand(container *assistant.CobraContainer) *cobra.Command {
 						AppEmoji, ApplicationName, options, args,
 					)
 
-					appErr = domain.EnterPool(native)
+					appErr = react.EnterPool(native)
 				} else {
 					return xv
 				}
@@ -60,40 +53,41 @@ func buildPoolCommand(container *assistant.CobraContainer) *cobra.Command {
 			return appErr
 		},
 	}
-	paramSet := assistant.NewParamSet[domain.PoolParameterSet](poolCommand)
+	paramSet := assistant.NewParamSet[react.PoolParameterSet](poolCommand)
 
 	// TODO: define the helper text for the flag (also applies to other flag)
 	//
 
-	// --cpu
+	// --after
 	//
-	defaultCPU := runtime.NumCPU()
+	defaultStopAfter := 1
 
 	const (
-		minCPU = 1
-		maxCPU = 16
+		minStopAfter = 1
+		maxStopAfter = 30
 	)
 
 	paramSet.BindValidatedIntWithin(
-		assistant.NewFlagInfo("cpu", "c", defaultCPU),
-		&paramSet.Native.NumCPU,
-		minCPU,
-		maxCPU,
+		assistant.NewFlagInfo("after", "a", defaultStopAfter),
+		&paramSet.Native.StopAfter,
+		minStopAfter,
+		maxStopAfter,
 	)
 
-	// --batch int (1-50)
+	// --now
 	//
+	defaultNoWorkers := runtime.NumCPU()
+
 	const (
-		defaultBatch = 13
-		minBatch     = 1
-		maxBatch     = 16
+		minNoWorkers = 1
+		maxNoWorkers = 16
 	)
 
 	paramSet.BindValidatedIntWithin(
-		assistant.NewFlagInfo("batch", "b", defaultBatch),
-		&paramSet.Native.BatchSize,
-		minBatch,
-		maxBatch,
+		assistant.NewFlagInfo("now", "n", defaultNoWorkers),
+		&paramSet.Native.NoWorkers,
+		minNoWorkers,
+		maxNoWorkers,
 	)
 
 	// --jobq int (1-20)
@@ -104,8 +98,8 @@ func buildPoolCommand(container *assistant.CobraContainer) *cobra.Command {
 	)
 
 	paramSet.BindValidatedIntWithin(
-		assistant.NewFlagInfo("jobq", "j", defaultCPU),
-		&paramSet.Native.JobQueueSize,
+		assistant.NewFlagInfo("jobq", "j", defaultNoWorkers),
+		&paramSet.Native.JobsChSize,
 		minJobQueueSize,
 		maxJobQueueSize,
 	)
@@ -113,15 +107,15 @@ func buildPoolCommand(container *assistant.CobraContainer) *cobra.Command {
 	// --resq int (1-16)
 	//
 	const (
-		minResultQueueSize = 1
-		maxResultQueueSize = 20
+		minResultsChSize = 1
+		maxResultsChSize = 20
 	)
 
 	paramSet.BindValidatedIntWithin(
-		assistant.NewFlagInfo("resq", "r", defaultCPU),
-		&paramSet.Native.ResultQueueSize,
-		minResultQueueSize,
-		maxResultQueueSize,
+		assistant.NewFlagInfo("resq", "r", defaultNoWorkers),
+		&paramSet.Native.ResultsChSize,
+		minResultsChSize,
+		maxResultsChSize,
 	)
 
 	// -- delay (1-20)
@@ -137,6 +131,21 @@ func buildPoolCommand(container *assistant.CobraContainer) *cobra.Command {
 		&paramSet.Native.Delay,
 		minDelay,
 		maxDelay,
+	)
+
+	// --batch int (1-50)
+	//
+	const (
+		defaultBatch = 13
+		minBatch     = 1
+		maxBatch     = 16
+	)
+
+	paramSet.BindValidatedIntWithin(
+		assistant.NewFlagInfo("batch", "b", defaultBatch),
+		&paramSet.Native.BatchSize,
+		minBatch,
+		maxBatch,
 	)
 
 	container.MustRegisterRootedCommand(poolCommand)

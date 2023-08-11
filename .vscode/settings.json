@@ -14,6 +14,7 @@
     "exportloopref",
     "extendio",
     "fieldalignment",
+    "gobby",
     "goconst",
     "gocritic",
     "gocyclo",
@@ -28,14 +29,18 @@
     "jibberjabber",
     "jobq",
     "linters",
+    "lorax",
     "lorex",
     "nakedret",
+    "nolint",
     "nolintlint",
     "pixa",
     "prealloc",
     "repotoken",
     "resq",
     "sidewalk",
+    "skeletor",
+    "smaug",
     "staticcheck",
     "structcheck",
     "stylecheck",
@@ -44,6 +49,7 @@
     "typecheck",
     "unconvert",
     "unparam",
-    "varcheck"
+    "varcheck",
+    "xenomorph"
   ]
 }

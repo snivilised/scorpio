@@ -57,7 +57,7 @@ var _ = Describe("PoolCmd", Ordered, func() {
 				Detector: &DetectorStub{},
 			}
 			tester := helpers.CommandTester{
-				Args: []string{"pool", "-c", "2", "-b", "5"},
+				Args: []string{"pool", "-n", "2", "-b", "5"},
 				Root: bootstrap.Root(),
 			}
 			_, err := tester.Execute()
