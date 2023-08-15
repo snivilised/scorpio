@@ -20,7 +20,7 @@ require (
 	github.com/google/pprof v0.0.0-20230406165453-00490a63f317 // indirect
 	github.com/onsi/ginkgo v1.16.5 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
-	github.com/snivilised/lorax v0.0.0-20230811181248-aacc8caa680b // indirect
+	github.com/snivilised/lorax v0.0.0-20230815112200-4f537c018913 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/exp v0.0.0-20230321023759-10a507213a29 // indirect
 	golang.org/x/tools v0.9.3 // indirect

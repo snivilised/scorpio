@@ -70,21 +70,44 @@ func (p *Producer[I, R]) run(ctx context.Context) {
 
 		case <-time.After(time.Second / time.Duration(p.stopAfter)):
 			fmt.Printf(">>>> ✨ producer.run - default (running: %v) ...\n", running)
-			p.item()
+
+			if !p.item(ctx) {
+				running = false
+			}
 		}
 	}
 }
 
-func (p *Producer[I, R]) item() {
-	i := p.provider()
-	j := async.Job[I]{
-		ID:    fmt.Sprintf("JOB-ID:%v", uuid.NewString()),
-		Input: i,
-	}
-	p.JobsCh <- j
+func (p *Producer[I, R]) item(ctx context.Context) bool {
+	p.sequenceNo++
 	p.Count++
 
-	fmt.Printf(">>>> ✨ producer.item, posted item: '%+v'\n", i)
+	result := true
+	i := p.provider()
+	j := async.Job[I]{
+		ID:         fmt.Sprintf("JOB-ID:%v", uuid.NewString()),
+		Input:      i,
+		SequenceNo: p.sequenceNo,
+	}
+
+	fmt.Printf(">>>> ✨ producer.item, 🟠 waiting to post item: '%+v'\n", i)
+
+	select {
+	case <-ctx.Done():
+		fmt.Println(">>>> 💠 producer.item - done received ⛔⛔⛔")
+
+		result = false
+
+	case p.JobsCh <- j:
+	}
+
+	if result {
+		fmt.Printf(">>>> ✨ producer.item, 🟢 posted item: '%+v'\n", i)
+	} else {
+		fmt.Printf(">>>> ✨ producer.item, 🔴 item NOT posted: '%+v'\n", i)
+	}
+
+	return result
 }
 
 func (p *Producer[I, R]) Stop() {
@@ -107,4 +130,25 @@ func StopProducerAfter[I, R any](
 
 	producer.Stop()
 	fmt.Printf("		>>> 🍧🍧🍧 stop submitted.\n")
+}
+
+func CancelProducerAfter[I, R any](
+	delay time.Duration,
+	cancellation ...context.CancelFunc,
+) {
+	fmt.Printf("		>>> 💤 CancelAfter - Sleeping before requesting cancellation (%v) ...\n", delay)
+	<-time.After(delay)
+
+	// we should always expect to get a cancel function back, even if we don't
+	// ever use it, so it is still relevant to get it in the stop test case
+	//
+	if len(cancellation) > 0 {
+		cancel := cancellation[0]
+
+		fmt.Printf("		>>> CancelAfter - 🛑🛑🛑 cancellation submitted.\n")
+		cancel()
+		fmt.Printf("		>>> CancelAfter - ➖➖➖ CANCELLED\n")
+	} else {
+		fmt.Printf("		>>> CancelAfter(noc) - ✖️✖️✖️ cancellation attempt benign.\n")
+	}
 }

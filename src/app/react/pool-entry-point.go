@@ -16,12 +16,15 @@ func EnterPool(ps *PoolParameterSet) error {
 
 	fmt.Println("---> 🎯 orpheus(alpha) ...")
 
+	ctxCancel, cancel := context.WithCancel(ctx)
+	cancellations := []context.CancelFunc{cancel}
+
 	pipe := start[TestJobInput, TestJobResult](ps.ResultsChSize)
 	sequence := 0
 
 	fmt.Println("👾 WAIT-GROUP ADD(producer)")
 
-	pipe.startProducer(ctx, func() TestJobInput {
+	pipe.produce(ctxCancel, func() TestJobInput {
 		recipient := rand.Intn(len(audience)) //nolint:gosec // trivial
 		sequence++
 		return TestJobInput{
@@ -32,15 +35,20 @@ func EnterPool(ps *PoolParameterSet) error {
 
 	fmt.Println("👾 WAIT-GROUP ADD(worker-pool)")
 
-	pipe.startPool(ctx, greeter, ps.NoWorkers)
+	pipe.process(ctxCancel, greeter, ps.NoWorkers)
 
 	fmt.Println("👾 WAIT-GROUP ADD(consumer)")
 
-	pipe.startConsumer(ctx)
+	pipe.consume(ctxCancel)
 
 	fmt.Println("👾 NOW AWAITING TERMINATION")
 
-	pipe.stopProducerAfter(ctx, time.Second*time.Duration(ps.StopAfter))
+	if ps.DoCancel {
+		pipe.cancel.After(ctxCancel, time.Second*time.Duration(ps.After), cancellations...)
+	} else {
+		pipe.stop.After(ctxCancel, time.Second*time.Duration(ps.After))
+	}
+
 	pipe.wg.Wait()
 
 	fmt.Printf("<--- orpheus(alpha) finished Counts >>> (Producer: '%v', Consumer: '%v'). 🎯🎯🎯\n",
