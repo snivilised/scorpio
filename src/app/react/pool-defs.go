@@ -1,6 +1,7 @@
 package react
 
 import (
+	"context"
 	"fmt"
 	"math/rand"
 	"time"
@@ -17,7 +18,8 @@ const (
 
 // PoolParameterSet
 type PoolParameterSet struct {
-	StopAfter     int
+	After         int
+	DoCancel      bool
 	NoWorkers     int
 	BatchSize     int
 	JobsChSize    int
@@ -68,4 +70,12 @@ var greeter = func(j async.Job[TestJobInput]) (async.JobResult[TestJobResult], e
 	}
 
 	return result, nil
+}
+
+// TerminatorFunc brings the work pool processing to an end, eg
+// by stopping or cancellation after the requested amount of time.
+type TerminatorFunc[I, R any] func(ctx context.Context, delay time.Duration, funcs ...context.CancelFunc)
+
+func (f TerminatorFunc[I, R]) After(ctx context.Context, delay time.Duration, funcs ...context.CancelFunc) {
+	f(ctx, delay, funcs...)
 }

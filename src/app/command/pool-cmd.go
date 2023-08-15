@@ -69,9 +69,16 @@ func buildPoolCommand(container *assistant.CobraContainer) *cobra.Command {
 
 	paramSet.BindValidatedIntWithin(
 		assistant.NewFlagInfo("after", "a", defaultStopAfter),
-		&paramSet.Native.StopAfter,
+		&paramSet.Native.After,
 		minStopAfter,
 		maxStopAfter,
+	)
+
+	// --cancel
+	//
+	paramSet.BindBool(
+		assistant.NewFlagInfo("cancel", "c", false),
+		&paramSet.Native.DoCancel,
 	)
 
 	// --now

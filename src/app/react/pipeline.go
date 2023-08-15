@@ -16,6 +16,8 @@ type pipeline[I, R any] struct {
 	producer  *Producer[I, R]
 	pool      *async.WorkerPool[I, R]
 	consumer  *Consumer[R]
+	cancel    TerminatorFunc[I, R]
+	stop      TerminatorFunc[I, R]
 }
 
 func start[I, R any](resultsChSize int) *pipeline[I, R] {
@@ -28,11 +30,25 @@ func start[I, R any](resultsChSize int) *pipeline[I, R] {
 	return pipe
 }
 
-func (p *pipeline[I, R]) startProducer(
+func (p *pipeline[I, R]) produce(
 	ctx context.Context,
 	provider ProviderFn[I],
 	jobChSize int,
 ) {
+	p.cancel = func(ctx context.Context, delay time.Duration, cancellations ...context.CancelFunc) {
+		go CancelProducerAfter[I, R](
+			delay,
+			cancellations...,
+		)
+	}
+	p.stop = func(ctx context.Context, delay time.Duration, _ ...context.CancelFunc) {
+		go StopProducerAfter(
+			ctx,
+			p.producer,
+			delay,
+		)
+	}
+
 	p.producer = StartProducer[I, R](
 		ctx,
 		&p.wg,
@@ -44,7 +60,7 @@ func (p *pipeline[I, R]) startProducer(
 	p.wg.Add(1)
 }
 
-func (p *pipeline[I, R]) startPool(
+func (p *pipeline[I, R]) process(
 	ctx context.Context,
 	executive async.ExecutiveFunc[I, R],
 	noWorkers int,
@@ -63,7 +79,7 @@ func (p *pipeline[I, R]) startPool(
 	p.wg.Add(1)
 }
 
-func (p *pipeline[I, R]) startConsumer(ctx context.Context) {
+func (p *pipeline[I, R]) consume(ctx context.Context) {
 	p.consumer = StartConsumer(ctx,
 		&p.wg,
 		p.resultsCh,
