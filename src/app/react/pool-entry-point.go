@@ -19,7 +19,7 @@ func EnterPool(ps *PoolParameterSet) error {
 	ctxCancel, cancel := context.WithCancel(ctx)
 	cancellations := []context.CancelFunc{cancel}
 
-	pipe := start[TestJobInput, TestJobResult](ps.ResultsChSize)
+	pipe := start[TestJobInput, TestJobOutput](ps.OutputsChSize)
 	sequence := 0
 
 	fmt.Println("👾 WAIT-GROUP ADD(producer)")

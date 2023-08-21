@@ -8,27 +8,27 @@ import (
 	"github.com/snivilised/lorax/async"
 )
 
-type Consumer[R any] struct {
-	ResultsCh <-chan async.JobResult[R]
+type Consumer[O any] struct {
 	quit      *sync.WaitGroup
+	OutputsCh <-chan async.JobOutput[O]
 	Count     int
 }
 
-func StartConsumer[R any](
+func StartConsumer[O any](
 	ctx context.Context,
 	wg *sync.WaitGroup,
-	resultsCh <-chan async.JobResult[R],
-) *Consumer[R] {
-	consumer := &Consumer[R]{
-		ResultsCh: resultsCh,
+	outputsCh <-chan async.JobOutput[O],
+) *Consumer[O] {
+	consumer := &Consumer[O]{
 		quit:      wg,
+		OutputsCh: outputsCh,
 	}
 	go consumer.run(ctx)
 
 	return consumer
 }
 
-func (c *Consumer[R]) run(ctx context.Context) {
+func (c *Consumer[O]) run(ctx context.Context) {
 	defer func() {
 		c.quit.Done()
 		fmt.Printf("<<<< consumer.run - finished (QUIT). 💠💠💠 \n")
@@ -42,7 +42,7 @@ func (c *Consumer[R]) run(ctx context.Context) {
 
 			fmt.Println("<<<< 💠 consumer.run - done received 💔💔💔")
 
-		case result, ok := <-c.ResultsCh:
+		case result, ok := <-c.OutputsCh:
 			if ok {
 				c.Count++
 				fmt.Printf("<<<< 💠 consumer.run - new result arrived(#%v): '%+v' \n",

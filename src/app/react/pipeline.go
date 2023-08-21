@@ -8,35 +8,35 @@ import (
 	"github.com/snivilised/lorax/async"
 )
 
-type pipeline[I, R any] struct {
+type pipeline[I, O any] struct {
 	wg        sync.WaitGroup
 	sequence  int
-	resultsCh chan async.JobResult[R]
+	outputsCh chan async.JobOutput[O]
 	provider  ProviderFn[I]
-	producer  *Producer[I, R]
-	pool      *async.WorkerPool[I, R]
-	consumer  *Consumer[R]
-	cancel    TerminatorFunc[I, R]
-	stop      TerminatorFunc[I, R]
+	producer  *Producer[I, O]
+	pool      *async.WorkerPool[I, O]
+	consumer  *Consumer[O]
+	cancel    TerminatorFunc[I, O]
+	stop      TerminatorFunc[I, O]
 }
 
-func start[I, R any](resultsChSize int) *pipeline[I, R] {
-	resultsCh := make(chan async.JobResult[R], resultsChSize)
+func start[I, O any](outputsChSize int) *pipeline[I, O] {
+	outputsCh := make(chan async.JobOutput[O], outputsChSize)
 
-	pipe := &pipeline[I, R]{
-		resultsCh: resultsCh,
+	pipe := &pipeline[I, O]{
+		outputsCh: outputsCh,
 	}
 
 	return pipe
 }
 
-func (p *pipeline[I, R]) produce(
+func (p *pipeline[I, O]) produce(
 	ctx context.Context,
 	provider ProviderFn[I],
 	jobChSize int,
 ) {
 	p.cancel = func(ctx context.Context, delay time.Duration, cancellations ...context.CancelFunc) {
-		go CancelProducerAfter[I, R](
+		go CancelProducerAfter[I, O](
 			delay,
 			cancellations...,
 		)
@@ -49,7 +49,7 @@ func (p *pipeline[I, R]) produce(
 		)
 	}
 
-	p.producer = StartProducer[I, R](
+	p.producer = StartProducer[I, O](
 		ctx,
 		&p.wg,
 		jobChSize,
@@ -60,13 +60,13 @@ func (p *pipeline[I, R]) produce(
 	p.wg.Add(1)
 }
 
-func (p *pipeline[I, R]) process(
+func (p *pipeline[I, O]) process(
 	ctx context.Context,
-	executive async.ExecutiveFunc[I, R],
+	executive async.ExecutiveFunc[I, O],
 	noWorkers int,
 ) {
-	p.pool = async.NewWorkerPool[I, R](
-		&async.NewWorkerPoolParams[I, R]{
+	p.pool = async.NewWorkerPool[I, O](
+		&async.NewWorkerPoolParams[I, O]{
 			NoWorkers: noWorkers,
 			Exec:      executive,
 			JobsCh:    p.producer.JobsCh,
@@ -74,21 +74,21 @@ func (p *pipeline[I, R]) process(
 			Quit:      &p.wg,
 		})
 
-	go p.pool.Start(ctx, p.resultsCh)
+	go p.pool.Start(ctx, p.outputsCh)
 
 	p.wg.Add(1)
 }
 
-func (p *pipeline[I, R]) consume(ctx context.Context) {
+func (p *pipeline[I, O]) consume(ctx context.Context) {
 	p.consumer = StartConsumer(ctx,
 		&p.wg,
-		p.resultsCh,
+		p.outputsCh,
 	)
 
 	p.wg.Add(1)
 }
 
-func (p *pipeline[I, R]) stopProducerAfter(
+func (p *pipeline[I, O]) stopProducerAfter(
 	ctx context.Context,
 	after time.Duration,
 ) {

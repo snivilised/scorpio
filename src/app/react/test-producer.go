@@ -12,7 +12,7 @@ import (
 
 type ProviderFn[I any] func() I
 
-type Producer[I, R any] struct {
+type Producer[I, O any] struct {
 	sequenceNo  int
 	JobsCh      async.JobStream[I]
 	quit        *sync.WaitGroup
@@ -25,18 +25,18 @@ type Producer[I, R any] struct {
 // The producer owns the Jobs channel as it knows when to close it. This producer is
 // a fake producer and exposes a stop method that the client go routing can call to
 // indicate end of the work load.
-func StartProducer[I, R any](
+func StartProducer[I, O any](
 	ctx context.Context,
 	wg *sync.WaitGroup,
 	jobsChSize int,
 	provider ProviderFn[I],
 	stopAfter int,
-) *Producer[I, R] {
+) *Producer[I, O] {
 	if stopAfter == 0 {
 		panic(fmt.Sprintf("Invalid stopAfter requested: '%v'", stopAfter))
 	}
 
-	producer := Producer[I, R]{
+	producer := Producer[I, O]{
 		JobsCh:      make(async.JobStream[I], jobsChSize),
 		quit:        wg,
 		provider:    provider,
@@ -48,7 +48,7 @@ func StartProducer[I, R any](
 	return &producer
 }
 
-func (p *Producer[I, R]) run(ctx context.Context) {
+func (p *Producer[I, O]) run(ctx context.Context) {
 	defer func() {
 		close(p.JobsCh)
 		p.quit.Done()
@@ -78,7 +78,7 @@ func (p *Producer[I, R]) run(ctx context.Context) {
 	}
 }
 
-func (p *Producer[I, R]) item(ctx context.Context) bool {
+func (p *Producer[I, O]) item(ctx context.Context) bool {
 	p.sequenceNo++
 	p.Count++
 
@@ -110,16 +110,16 @@ func (p *Producer[I, R]) item(ctx context.Context) bool {
 	return result
 }
 
-func (p *Producer[I, R]) Stop() {
+func (p *Producer[I, O]) Stop() {
 	fmt.Println(">>>> 🧲 producer terminating ...")
 	p.terminateCh <- "done"
 	close(p.terminateCh)
 }
 
 // StopProducerAfter, run in a new go routine
-func StopProducerAfter[I, R any](
+func StopProducerAfter[I, O any](
 	ctx context.Context,
-	producer *Producer[I, R],
+	producer *Producer[I, O],
 	delay time.Duration,
 ) {
 	fmt.Printf("		>>> 💤 Sleeping before requesting stop (%v) ...\n", delay)
@@ -132,7 +132,7 @@ func StopProducerAfter[I, R any](
 	fmt.Printf("		>>> 🍧🍧🍧 stop submitted.\n")
 }
 
-func CancelProducerAfter[I, R any](
+func CancelProducerAfter[I, O any](
 	delay time.Duration,
 	cancellation ...context.CancelFunc,
 ) {
