@@ -120,7 +120,7 @@ func buildPoolCommand(container *assistant.CobraContainer) *cobra.Command {
 
 	paramSet.BindValidatedIntWithin(
 		assistant.NewFlagInfo("resq", "r", defaultNoWorkers),
-		&paramSet.Native.ResultsChSize,
+		&paramSet.Native.OutputsChSize,
 		minResultsChSize,
 		maxResultsChSize,
 	)

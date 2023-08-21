@@ -23,7 +23,7 @@ type PoolParameterSet struct {
 	NoWorkers     int
 	BatchSize     int
 	JobsChSize    int
-	ResultsChSize int
+	OutputsChSize int
 	Delay         int
 }
 
@@ -55,15 +55,15 @@ func (i TestJobInput) SequenceNo() int {
 	return i.sequenceNo
 }
 
-type TestJobResult = string
-type TestResultStream chan async.JobResult[TestJobResult]
+type TestJobOutput = string
+type TestResultStream chan async.JobOutput[TestJobOutput]
 
-var greeter = func(j async.Job[TestJobInput]) (async.JobResult[TestJobResult], error) {
+var greeter = func(j async.Job[TestJobInput]) (async.JobOutput[TestJobOutput], error) {
 	r := rand.Intn(Interval) + 1 //nolint:gosec // trivial
 	delay := time.Millisecond * time.Duration(r)
 	time.Sleep(delay)
 
-	result := async.JobResult[TestJobResult]{
+	result := async.JobOutput[TestJobOutput]{
 		Payload: fmt.Sprintf("			---> 🍉🍉🍉 [Seq: %v] Hello: '%v'",
 			j.Input.SequenceNo(), j.Input.Recipient,
 		),
@@ -74,8 +74,8 @@ var greeter = func(j async.Job[TestJobInput]) (async.JobResult[TestJobResult], e
 
 // TerminatorFunc brings the work pool processing to an end, eg
 // by stopping or cancellation after the requested amount of time.
-type TerminatorFunc[I, R any] func(ctx context.Context, delay time.Duration, funcs ...context.CancelFunc)
+type TerminatorFunc[I, O any] func(ctx context.Context, delay time.Duration, funcs ...context.CancelFunc)
 
-func (f TerminatorFunc[I, R]) After(ctx context.Context, delay time.Duration, funcs ...context.CancelFunc) {
+func (f TerminatorFunc[I, O]) After(ctx context.Context, delay time.Duration, funcs ...context.CancelFunc) {
 	f(ctx, delay, funcs...)
 }
