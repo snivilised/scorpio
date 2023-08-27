@@ -3,7 +3,6 @@ package react
 import (
 	"context"
 	"fmt"
-	"sync"
 	"time"
 
 	"github.com/google/uuid"
@@ -15,7 +14,9 @@ type ProviderFn[I any] func() I
 type Producer[I, O any] struct {
 	sequenceNo  int
 	JobsCh      async.JobStream[I]
-	quit        *sync.WaitGroup
+	RoutineName async.GoRoutineName
+	adder       async.AssistedAdder
+	quitter     async.AssistedQuitter
 	Count       int
 	provider    ProviderFn[I]
 	stopAfter   int
@@ -27,7 +28,8 @@ type Producer[I, O any] struct {
 // indicate end of the work load.
 func StartProducer[I, O any](
 	ctx context.Context,
-	wg *sync.WaitGroup,
+	adder async.AssistedAdder,
+	quitter async.AssistedQuitter,
 	jobsChSize int,
 	provider ProviderFn[I],
 	stopAfter int,
@@ -38,7 +40,9 @@ func StartProducer[I, O any](
 
 	producer := Producer[I, O]{
 		JobsCh:      make(async.JobStream[I], jobsChSize),
-		quit:        wg,
+		RoutineName: async.GoRoutineName("✨ producer"),
+		adder:       adder,
+		quitter:     quitter,
 		provider:    provider,
 		stopAfter:   stopAfter,
 		terminateCh: make(chan string),
@@ -51,7 +55,7 @@ func StartProducer[I, O any](
 func (p *Producer[I, O]) run(ctx context.Context) {
 	defer func() {
 		close(p.JobsCh)
-		p.quit.Done()
+		p.quitter.Done(p.RoutineName)
 		fmt.Printf(">>>> producer.run - finished (QUIT). ✨✨✨ \n")
 	}()
 

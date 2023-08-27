@@ -7,7 +7,7 @@ require (
 	github.com/onsi/gomega v1.27.10
 	github.com/samber/lo v1.38.1
 	github.com/snivilised/extendio v0.1.20
-	github.com/snivilised/lorax v0.2.4
+	github.com/snivilised/lorax v0.2.5
 	github.com/spf13/cobra v1.7.0
 	github.com/spf13/viper v1.16.0
 	go.uber.org/zap v1.25.0
