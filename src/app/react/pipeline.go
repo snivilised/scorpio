@@ -2,14 +2,15 @@ package react
 
 import (
 	"context"
-	"sync"
 	"time"
 
 	"github.com/snivilised/lorax/async"
 )
 
 type pipeline[I, O any] struct {
-	wg        sync.WaitGroup
+	adder     async.AssistedAdder
+	quitter   async.AssistedQuitter
+	waiter    async.AssistedWaiter
 	sequence  int
 	outputsCh chan async.JobOutput[O]
 	provider  ProviderFn[I]
@@ -23,7 +24,11 @@ type pipeline[I, O any] struct {
 func start[I, O any](outputsChSize int) *pipeline[I, O] {
 	outputsCh := make(chan async.JobOutput[O], outputsChSize)
 
+	wgex := async.NewAnnotatedWaitGroup("🍂 scorpio")
 	pipe := &pipeline[I, O]{
+		adder:     wgex,
+		quitter:   wgex,
+		waiter:    wgex,
 		outputsCh: outputsCh,
 	}
 
@@ -51,13 +56,14 @@ func (p *pipeline[I, O]) produce(
 
 	p.producer = StartProducer[I, O](
 		ctx,
-		&p.wg,
+		p.adder,
+		p.quitter,
 		jobChSize,
 		provider,
 		Delay,
 	)
 
-	p.wg.Add(1)
+	p.adder.Add(1, p.producer.RoutineName)
 }
 
 func (p *pipeline[I, O]) process(
@@ -71,21 +77,21 @@ func (p *pipeline[I, O]) process(
 			Exec:      executive,
 			JobsCh:    p.producer.JobsCh,
 			CancelCh:  make(async.CancelStream),
-			Quit:      &p.wg,
+			Quitter:   p.quitter,
 		})
 
 	go p.pool.Start(ctx, p.outputsCh)
 
-	p.wg.Add(1)
+	p.adder.Add(1, p.pool.RoutineName)
 }
 
 func (p *pipeline[I, O]) consume(ctx context.Context) {
 	p.consumer = StartConsumer(ctx,
-		&p.wg,
+		p.quitter,
 		p.outputsCh,
 	)
 
-	p.wg.Add(1)
+	p.adder.Add(1, p.consumer.RoutineName)
 }
 
 func (p *pipeline[I, O]) stopProducerAfter(

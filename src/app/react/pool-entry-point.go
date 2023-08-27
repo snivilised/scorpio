@@ -5,10 +5,13 @@ import (
 	"fmt"
 	"math/rand"
 	"time"
+
+	"github.com/snivilised/lorax/async"
 )
 
 const (
-	StopAfter = 5
+	StopAfter   = 5
+	RoutineName = async.GoRoutineName("👾 test-main")
 )
 
 func EnterPool(ps *PoolParameterSet) error {
@@ -49,7 +52,7 @@ func EnterPool(ps *PoolParameterSet) error {
 		pipe.stop.After(ctxCancel, time.Second*time.Duration(ps.After))
 	}
 
-	pipe.wg.Wait()
+	pipe.waiter.Wait(RoutineName)
 
 	fmt.Printf("<--- orpheus(alpha) finished Counts >>> (Producer: '%v', Consumer: '%v'). 🎯🎯🎯\n",
 		pipe.producer.Count,

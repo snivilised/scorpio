@@ -196,6 +196,8 @@ github.com/snivilised/extendio v0.1.20 h1:pEnWUHFBVf62EaDWyG2dYsJdwiyWCs/GN8pQBl
 github.com/snivilised/extendio v0.1.20/go.mod h1:60Q6KRprh4qD7+aDXdlnKkXSgcmwsEV91OPO7j2CaEI=
 github.com/snivilised/lorax v0.2.4 h1:bTjZmN3MBBB4SMNseJJRBjCT2oIKOn4hL9e2HymLBH0=
 github.com/snivilised/lorax v0.2.4/go.mod h1:Oa1QbZH3E5zfU5y5lmfKEcwPvuv3cHjNqk1/XhszucE=
+github.com/snivilised/lorax v0.2.5 h1:0WOjjHfj08Ou85FY5V/p2QHUL4U9YZebWz2qhKjYwsQ=
+github.com/snivilised/lorax v0.2.5/go.mod h1:Oa1QbZH3E5zfU5y5lmfKEcwPvuv3cHjNqk1/XhszucE=
 github.com/spf13/afero v1.9.5 h1:stMpOSZFs//0Lv29HduCmli3GUfpFoF3Y1Q/aXj/wVM=
 github.com/spf13/afero v1.9.5/go.mod h1:UBogFpq8E9Hx+xc5CNTTEpTnuHVmXDwZcZcE1eb/UhQ=
 github.com/spf13/cast v1.5.1 h1:R+kOtfhWQE6TVQzY+4D7wJLBgkdVasCEFxSUBYBYIlA=
