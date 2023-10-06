@@ -6,20 +6,18 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/snivilised/lorax/async"
+	"github.com/snivilised/lorax/boost"
 )
 
 const (
 	StopAfter   = 5
-	RoutineName = async.GoRoutineName("👾 test-main")
+	RoutineName = boost.GoRoutineName("👾 test-main")
 )
 
 func EnterPool(ps *PoolParameterSet) error {
-	ctx := context.Background()
-
 	fmt.Println("---> 🎯 orpheus(alpha) ...")
 
-	ctxCancel, cancel := context.WithCancel(ctx)
+	ctx, cancel := context.WithCancel(context.Background())
 	cancellations := []context.CancelFunc{cancel}
 
 	pipe := start[TestJobInput, TestJobOutput](ps.OutputsChSize)
@@ -27,7 +25,7 @@ func EnterPool(ps *PoolParameterSet) error {
 
 	fmt.Println("👾 WAIT-GROUP ADD(producer)")
 
-	pipe.produce(ctxCancel, func() TestJobInput {
+	pipe.produce(ctx, func() TestJobInput {
 		recipient := rand.Intn(len(audience)) //nolint:gosec // trivial
 		sequence++
 		return TestJobInput{
@@ -38,21 +36,21 @@ func EnterPool(ps *PoolParameterSet) error {
 
 	fmt.Println("👾 WAIT-GROUP ADD(worker-pool)")
 
-	pipe.process(ctxCancel, greeter, ps.NoWorkers)
+	pipe.process(ctx, cancel, greeter, ps.NoWorkers)
 
 	fmt.Println("👾 WAIT-GROUP ADD(consumer)")
 
-	pipe.consume(ctxCancel)
+	pipe.consume(ctx, cancel)
 
 	fmt.Println("👾 NOW AWAITING TERMINATION")
 
 	if ps.DoCancel {
-		pipe.cancel.After(ctxCancel, time.Second*time.Duration(ps.After), cancellations...)
+		pipe.cancel.After(ctx, time.Second*time.Duration(ps.After), cancellations...)
 	} else {
-		pipe.stop.After(ctxCancel, time.Second*time.Duration(ps.After))
+		pipe.stop.After(ctx, time.Second*time.Duration(ps.After))
 	}
 
-	pipe.waiter.Wait(RoutineName)
+	pipe.wgan.Wait(RoutineName)
 
 	fmt.Printf("<--- orpheus(alpha) finished Counts >>> (Producer: '%v', Consumer: '%v'). 🎯🎯🎯\n",
 		pipe.producer.Count,

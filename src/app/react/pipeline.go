@@ -4,31 +4,27 @@ import (
 	"context"
 	"time"
 
-	"github.com/snivilised/lorax/async"
+	"github.com/snivilised/lorax/boost"
 )
 
 type pipeline[I, O any] struct {
-	adder     async.AssistedAdder
-	quitter   async.AssistedQuitter
-	waiter    async.AssistedWaiter
+	wgan      boost.WaitGroupAn
 	sequence  int
-	outputsCh chan async.JobOutput[O]
+	outputsCh chan boost.JobOutput[O]
 	provider  ProviderFn[I]
 	producer  *Producer[I, O]
-	pool      *async.WorkerPool[I, O]
+	pool      *boost.WorkerPool[I, O]
 	consumer  *Consumer[O]
 	cancel    TerminatorFunc[I, O]
 	stop      TerminatorFunc[I, O]
 }
 
 func start[I, O any](outputsChSize int) *pipeline[I, O] {
-	outputsCh := make(chan async.JobOutput[O], outputsChSize)
+	outputsCh := make(chan boost.JobOutput[O], outputsChSize)
 
-	wgex := async.NewAnnotatedWaitGroup("🍂 scorpio")
+	wgan := boost.NewAnnotatedWaitGroup("🍂 scorpio")
 	pipe := &pipeline[I, O]{
-		adder:     wgex,
-		quitter:   wgex,
-		waiter:    wgex,
+		wgan:      wgan,
 		outputsCh: outputsCh,
 	}
 
@@ -56,42 +52,47 @@ func (p *pipeline[I, O]) produce(
 
 	p.producer = StartProducer[I, O](
 		ctx,
-		p.adder,
-		p.quitter,
+		p.wgan,
 		jobChSize,
 		provider,
 		Delay,
 	)
 
-	p.adder.Add(1, p.producer.RoutineName)
+	p.wgan.Add(1, p.producer.RoutineName)
 }
 
 func (p *pipeline[I, O]) process(
 	ctx context.Context,
-	executive async.ExecutiveFunc[I, O],
+	cancel context.CancelFunc,
+	executive boost.ExecutiveFunc[I, O],
 	noWorkers int,
 ) {
-	p.pool = async.NewWorkerPool[I, O](
-		&async.NewWorkerPoolParams[I, O]{
-			NoWorkers: noWorkers,
-			Exec:      executive,
-			JobsCh:    p.producer.JobsCh,
-			CancelCh:  make(async.CancelStream),
-			Quitter:   p.quitter,
+	var outputTimeout = time.Second * 2
+
+	p.pool = boost.NewWorkerPool[I, O](
+		&boost.NewWorkerPoolParams[I, O]{
+			NoWorkers:       noWorkers,
+			OutputChTimeout: outputTimeout,
+			Exec:            executive,
+			JobsCh:          p.producer.JobsCh,
+			CancelCh:        make(boost.CancelStream),
+			WaitAQ:          p.wgan,
 		})
 
-	go p.pool.Start(ctx, p.outputsCh)
+	go p.pool.Start(ctx, cancel, p.outputsCh)
 
-	p.adder.Add(1, p.pool.RoutineName)
+	p.wgan.Add(1, p.pool.RoutineName)
 }
 
-func (p *pipeline[I, O]) consume(ctx context.Context) {
-	p.consumer = StartConsumer(ctx,
-		p.quitter,
+func (p *pipeline[I, O]) consume(ctx context.Context, cancel context.CancelFunc) {
+	p.consumer = StartConsumer(
+		ctx,
+		cancel,
+		p.wgan,
 		p.outputsCh,
 	)
 
-	p.adder.Add(1, p.consumer.RoutineName)
+	p.wgan.Add(1, p.consumer.RoutineName)
 }
 
 func (p *pipeline[I, O]) stopProducerAfter(

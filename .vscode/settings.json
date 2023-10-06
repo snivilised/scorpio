@@ -50,6 +50,7 @@
     "unconvert",
     "unparam",
     "varcheck",
+    "wgan",
     "wgex",
     "xenomorph"
   ]
