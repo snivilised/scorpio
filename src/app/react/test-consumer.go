@@ -4,36 +4,38 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/snivilised/lorax/async"
+	"github.com/snivilised/lorax/boost"
 )
 
 type Consumer[O any] struct {
-	RoutineName async.GoRoutineName
-	quitter     async.AssistedQuitter
-	OutputsCh   <-chan async.JobOutput[O]
+	RoutineName boost.GoRoutineName
+	quitter     boost.WaitGroupAn
+	OutputsCh   <-chan boost.JobOutput[O]
 	Count       int
 }
 
 func StartConsumer[O any](
 	ctx context.Context,
-	quitter async.AssistedQuitter,
-	outputsCh <-chan async.JobOutput[O],
+	cancel context.CancelFunc,
+	quitter boost.WaitGroupAn,
+	outputsCh <-chan boost.JobOutput[O],
 ) *Consumer[O] {
 	consumer := &Consumer[O]{
-		RoutineName: async.GoRoutineName("💠 consumer"),
+		RoutineName: boost.GoRoutineName("💠 consumer"),
 		quitter:     quitter,
 		OutputsCh:   outputsCh,
 	}
-	go consumer.run(ctx)
+	go consumer.run(ctx, cancel)
 
 	return consumer
 }
 
-func (c *Consumer[O]) run(ctx context.Context) {
+func (c *Consumer[O]) run(ctx context.Context, _ context.CancelFunc) {
 	defer func() {
 		c.quitter.Done(c.RoutineName)
 		fmt.Printf("<<<< consumer.run - finished (QUIT). 💠💠💠 \n")
 	}()
+
 	fmt.Printf("<<<< 💠 consumer.run ...\n")
 
 	for running := true; running; {

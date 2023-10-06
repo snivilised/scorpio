@@ -6,17 +6,16 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/snivilised/lorax/async"
+	"github.com/snivilised/lorax/boost"
 )
 
 type ProviderFn[I any] func() I
 
 type Producer[I, O any] struct {
 	sequenceNo  int
-	JobsCh      async.JobStream[I]
-	RoutineName async.GoRoutineName
-	adder       async.AssistedAdder
-	quitter     async.AssistedQuitter
+	JobsCh      boost.JobStream[I]
+	RoutineName boost.GoRoutineName
+	wgan        boost.WaitGroupAn
 	Count       int
 	provider    ProviderFn[I]
 	stopAfter   int
@@ -28,8 +27,7 @@ type Producer[I, O any] struct {
 // indicate end of the work load.
 func StartProducer[I, O any](
 	ctx context.Context,
-	adder async.AssistedAdder,
-	quitter async.AssistedQuitter,
+	wgan boost.WaitGroupAn,
 	jobsChSize int,
 	provider ProviderFn[I],
 	stopAfter int,
@@ -39,10 +37,9 @@ func StartProducer[I, O any](
 	}
 
 	producer := Producer[I, O]{
-		JobsCh:      make(async.JobStream[I], jobsChSize),
-		RoutineName: async.GoRoutineName("✨ producer"),
-		adder:       adder,
-		quitter:     quitter,
+		JobsCh:      make(boost.JobStream[I], jobsChSize),
+		RoutineName: boost.GoRoutineName("✨ producer"),
+		wgan:        wgan,
 		provider:    provider,
 		stopAfter:   stopAfter,
 		terminateCh: make(chan string),
@@ -55,7 +52,7 @@ func StartProducer[I, O any](
 func (p *Producer[I, O]) run(ctx context.Context) {
 	defer func() {
 		close(p.JobsCh)
-		p.quitter.Done(p.RoutineName)
+		p.wgan.Done(p.RoutineName)
 		fmt.Printf(">>>> producer.run - finished (QUIT). ✨✨✨ \n")
 	}()
 
@@ -88,7 +85,7 @@ func (p *Producer[I, O]) item(ctx context.Context) bool {
 
 	result := true
 	i := p.provider()
-	j := async.Job[I]{
+	j := boost.Job[I]{
 		ID:         fmt.Sprintf("JOB-ID:%v", uuid.NewString()),
 		Input:      i,
 		SequenceNo: p.sequenceNo,

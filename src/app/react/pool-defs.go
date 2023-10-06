@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/snivilised/cobrass/src/assistant"
-	"github.com/snivilised/lorax/async"
+	"github.com/snivilised/lorax/boost"
 )
 
 const (
@@ -56,14 +56,14 @@ func (i TestJobInput) SequenceNo() int {
 }
 
 type TestJobOutput = string
-type TestResultStream chan async.JobOutput[TestJobOutput]
+type TestResultStream chan boost.JobOutput[TestJobOutput]
 
-var greeter = func(j async.Job[TestJobInput]) (async.JobOutput[TestJobOutput], error) {
+var greeter = func(j boost.Job[TestJobInput]) (boost.JobOutput[TestJobOutput], error) {
 	r := rand.Intn(Interval) + 1 //nolint:gosec // trivial
 	delay := time.Millisecond * time.Duration(r)
 	time.Sleep(delay)
 
-	result := async.JobOutput[TestJobOutput]{
+	result := boost.JobOutput[TestJobOutput]{
 		Payload: fmt.Sprintf("			---> 🍉🍉🍉 [Seq: %v] Hello: '%v'",
 			j.Input.SequenceNo(), j.Input.Recipient,
 		),
