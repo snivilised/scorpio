@@ -28,6 +28,7 @@ func EnterPool(ps *PoolParameterSet) error {
 	pipe.produce(ctx, func() TestJobInput {
 		recipient := rand.Intn(len(audience)) //nolint:gosec // trivial
 		sequence++
+
 		return TestJobInput{
 			sequenceNo: sequence,
 			Recipient:  audience[recipient],

@@ -36,7 +36,7 @@ func (p *pipeline[I, O]) produce(
 	provider ProviderFn[I],
 	jobChSize int,
 ) {
-	p.cancel = func(ctx context.Context, delay time.Duration, cancellations ...context.CancelFunc) {
+	p.cancel = func(_ context.Context, delay time.Duration, cancellations ...context.CancelFunc) {
 		go CancelProducerAfter[I, O](
 			delay,
 			cancellations...,

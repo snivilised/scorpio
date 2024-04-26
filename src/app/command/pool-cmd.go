@@ -31,7 +31,7 @@ func buildPoolCommand(container *assistant.CobraContainer) *cobra.Command {
 
 				// optionally invoke cross field validation
 				//
-				if xv := ps.CrossValidate(func(ps *react.PoolParameterSet) error {
+				if xv := ps.CrossValidate(func(_ *react.PoolParameterSet) error {
 					return nil
 				}); xv == nil {
 					options := []string{}
