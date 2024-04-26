@@ -16,6 +16,7 @@ func NewLogger(info *LoggerInfo) Ref {
 			if info.Path == "" {
 				panic(i18n.NewInvalidConfigEntryError(info.Path, "-"))
 			}
+
 			ws := zapcore.AddSync(&lumberjack.Logger{
 				Filename:   info.Path,
 				MaxSize:    info.Rotation.MaxSizeInMb,
@@ -29,6 +30,7 @@ func NewLogger(info *LoggerInfo) Ref {
 				ws,
 				info.Level,
 			)
+
 			return zap.New(core)
 		}, func() Logger {
 			return zap.NewNop()

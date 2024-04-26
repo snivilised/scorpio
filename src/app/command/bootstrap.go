@@ -94,8 +94,7 @@ func (b *Bootstrap) configure(options ...ConfigureOptionFn) {
 		//
 		viper.AddConfigPath(home)
 		viper.SetConfigType("yaml")
-		configName := fmt.Sprintf("%v.yml", ApplicationName)
-		viper.SetConfigName(configName)
+		viper.SetConfigName(fmt.Sprintf("%v.yml", ApplicationName))
 	}
 
 	viper.AutomaticEnv() // read in environment variables that match
